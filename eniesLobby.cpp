@@ -768,31 +768,123 @@ void Usopp::endTurn(BattleContext& context) {
  */
 Franky::Franky(string name, int hp, int atk, int def,
                int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
-    // TODO: implement
+}
+
+int Franky::coupDeVent(Character* target, BattleContext& context) {
+    this->energy -= 30;
+    int dmg = ceil(this->atk * 1.2);
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        defeatedEnemyThisTurn = true;
+        context.morale += 5;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
+    return actualDmg;
+}
+
+int Franky::strongRight(Character* target, BattleContext& context) {
+    this->energy -= 20;
+    int dmg = ceil(this->atk * 1.8);
+    int targetSpeed = target->getSpeed();
+    int hpBefore = target->getHP();
+
+    if (target->isLucci()) {
+        dmg += ceil(dmg * 0.2);
+    } 
+    
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    target->receiveDamage(dmg);
+    target->setSpeed(targetSpeed - 8);
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        defeatedEnemyThisTurn = true;
+        context.morale += 5;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
+    return actualDmg;
 }
 
 int Franky::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk + ceil(this->def * 0.3);
+    dmg += ceil(dmg * 0.1);
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        defeatedEnemyThisTurn = true;
+        context.morale += 5;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
+    return actualDmg;
 }
 
 int Franky::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
+    if (this->energy >= 30) {
+        return coupDeVent(target, context);
+    }
+
+    else if (this->energy >= 20) {
+        return strongRight(target, context);
+    }
     return 0;
+}
+
+int Franky::coupDeVent(Building* target, BattleContext& context) {
+    this->energy -= 30;
+    int buildingHp = target->getHP();
+    target->receiveDamage(buildingHp);
+    return buildingHp;
+}
+
+int Franky::strongRight(Building* target, BattleContext& context) {
+    this->energy -= 20;
+    int dmg = ceil(this->atk * 1.8);
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 int Franky::attack(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk + ceil(this->def * 0.3);
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 int Franky::specialSkill(Building* target, BattleContext& context) {
-    // TODO: implement
+    if (this->energy >= 30) {
+        return coupDeVent(target, context);
+    }
+
+    else if (this->energy >= 20) {
+        return strongRight(target, context);
+    }
     return 0;
 }
 
 void Franky::endTurn(BattleContext& context) {
-    // TODO: implement
+    if (this->hp > this->maxHp * 0.7) {
+        this->def += 5;
+    }
+    else if (this->hp < this->maxHp * 0.3 && this->hp > 0) {
+        this->atk += ceil(this->atk * 0.1);
+    }
+
+    if (this->defeatedEnemyThisTurn) {
+        this->defeatedEnemyThisTurn = false;
+    }
 }
 
 /*
