@@ -53,7 +53,7 @@ public:
 class StrawHat : public Character {
 protected:
     long long bounty;
-
+    bool defeatedEnemyThisTurn; // To track if the enemy is defeated this turn
 public:
     StrawHat();
     StrawHat(string name, int hp, int atk, int def,
