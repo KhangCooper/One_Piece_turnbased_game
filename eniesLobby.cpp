@@ -35,8 +35,23 @@ Character::Character() {
     alive = false;
 }
 
+// Constructor for class Character with parameters
 Character::Character(string name, int hp, int atk, int def, int speed, int energy) {
-    // TODO: implement
+    this->name = name;
+    this->hp = (hp < 0)? 0 : hp;
+    this->atk = atk;
+    this->def = def;
+    this->speed = speed;
+    this->energy = (energy < 0) ? 0 : (energy > 100) ? 100 : energy; // Make sure 0 <= energy <= 100
+    this->maxHp = this->hp;
+    this->isLowestHP = false;
+    if (this->hp > 0) {
+        this->alive = true; // Character is alive if hp > 0
+    } 
+    
+    else {
+        this->alive = false; // Character is dead if hp <= 0
+    }
 }
 
 Character::~Character() {
@@ -55,8 +70,21 @@ void Character::endTurn(BattleContext& context) {
     return ;
 }
 
+// Method which makes character recieve damage
 void Character::receiveDamage(int damage) {
-    // TODO: implement
+    if (!this->alive) {
+        return; // If is already dead, don't deal damage
+    }
+
+    // Calculate the lost hp: lostHp = damage - def of target
+    int hpLost = (damage - this->def > 0)? damage - this->def : 0;
+    // Deal damage
+    this->hp -= hpLost;
+
+    if (hp <= 0) {
+        this->hp = 0; // Set hp = 0 in case the damage > current hp
+        this->alive = false; // Set the character to dead if hp 
+    }
 }
 
 bool Character::isAlive() const {
