@@ -2,7 +2,7 @@
 
 /*
 NOTE:
--According to the testcase of the school, the morale updating mechanic will not applied if the straw hat destroy buildings
+-According to the testcase of the school, the morale updating mechanic will not applied if the straw hat destroy buildings.
 */
 
 /*
@@ -97,6 +97,9 @@ bool Character::isAlive() const {
     return alive;
 }
 
+/*
+GETTER
+*/
 string Character::getName() const {
     // TODO: implement
     return name;
@@ -112,6 +115,30 @@ int Character::getEnergy() const {
     return energy;
 }
 
+// Adding getter for def
+int Character::getDef() const {
+    return def;
+}
+
+// Adding getter for maxHP
+int Character::getMaxHP() const {
+    return maxHp;
+}
+
+/*
+SETTER 
+*/
+// Adding setter for def
+void Character::setDef(int def) {
+    this->def = def;
+    if (this->def < 0) {
+        this->def = 0;
+    }
+}
+
+/*
+BOOLEAN METHOD
+*/
 bool Character::isStrawHat() const {
     return false;
 }
@@ -277,32 +304,100 @@ void Luffy::endTurn(BattleContext& context) {
  * Zoro
  */
 Zoro::Zoro(string name, int hp, int atk, int def,
-           int speed, int energy, long long bounty) {
-    // TODO: implement
+           int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
 }
 
 int Zoro::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk + ceil(this->def * 0.2); // Gain damage base on defense
+    int hpBefore = target->getHP();
+
+    if (target->getHP() < target->getMaxHP() * 0.4) {
+        dmg = dmg + ceil(0.15 * this->atk); // Increase damage if target has low hp
+    }
+
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        this->defeatedEnemyThisTurn = true;
+    }
+
+    return actualDmg;
 }
 
 int Zoro::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 15) {
+        return 0;
+    }
+
+    int hpBefore = target->getHP();
+    int targetMaxHp = target->getMaxHP();
+    int dmg = ceil(this->atk * 2.2);
+
+    this->energy -= 15;
+    if (hpBefore < targetMaxHp * 0.5) {
+        dmg += ceil(dmg * 0.5);
+    }
+    
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    target->receiveDamage(dmg);
+
+    // Special effect if defeat enemy using skill
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        context.morale += 4;
+        this->energy += 8;
+        this->atk += ceil(this->atk * 0.05);
+    }
+
+    this->energy = (this->energy < 0)? 0 : (this->energy > 100)? 100 : this->energy;
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
+    return actualDmg;
 }
 
 int Zoro::attack(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    // Overloading function for building
+    int dmg = this->atk + ceil(this->def * 0.2);
+    int hpBefore = target->getHP();
+
+    if (target->getHP() < target->getMaxHP() * 0.4) {
+        dmg = dmg + ceil(0.15 * this->atk);
+    }
+
+    target->receiveDamage(dmg);
+
+    return dmg;
 }
 
 int Zoro::specialSkill(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    // Overloading function for building
+    if (this->energy < 15) {
+        return 0;
+    }
+
+    int hpBefore = target->getHP();
+    int targetMaxHp = target->getMaxHP();
+    int dmg = (this->atk * 22 + 9) / 10.0;
+
+    this->energy -= 15;
+    if (hpBefore < targetMaxHp * 0.5) {
+        dmg += ceil(dmg * 0.5);
+    }
+    
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 void Zoro::endTurn(BattleContext& context) {
-    // TODO: implement
+    if (this->defeatedEnemyThisTurn) {
+        context.morale += 6;
+        this->atk += ceil(this->atk * 0.05);
+        defeatedEnemyThisTurn = false;
+
+        context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    }
 }
 
 /*
