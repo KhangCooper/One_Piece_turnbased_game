@@ -122,18 +122,28 @@ StrawHat::StrawHat() : Character() {
     bounty = 0;
 }
 
-StrawHat::StrawHat(string name, int hp, int atk, int def,
-                   int speed, int energy, long long bounty) {
-    // TODO: implement
+StrawHat::StrawHat(string name, int hp, int atk, int def, // Make class StrawHat inherit the Character's attributes and methods
+                   int speed, int energy, long long bounty) : Character(name, hp, atk, def, speed, energy) {
+    // Assign value for StrawHat's new attribute
+    this->bounty = bounty;
 }
 
 bool StrawHat::isStrawHat() const {
-    // TODO: implement
+    return true; // Return true if the character is StrawHat   
 }
 
 string StrawHat::str() const {
-    // TODO: implement
-    return "";
+    // This function return the info of StrawHat
+    stringstream ss;
+    ss << "StrawHat[";
+    ss << "name=" << this->name <<", ";
+    ss << "hp=" << this->hp << ", ";
+    ss << "atk=" << this->atk << ", ";
+    ss << "def=" << this->def << ", ";
+    ss << "speed=" << this->speed << ", ";
+    ss << "energy=" << this->energy << ", ";
+    ss << "bounty=" << this->bounty << "]";
+    return ss.str(); // Concatenate string and return
 }
 
 /*
