@@ -290,6 +290,8 @@ public:
     int escapeProgress;
     int busterCallTimer;
     bool mainGateDestroyed;
+    bool courtDestroyed;
+    bool increaseRescue;
     bool robinRescued;
     bool bridgeOpened;
     bool battleEnded;
@@ -321,6 +323,11 @@ public:
     virtual void onDestroyed(BattleContext& context);
 
     virtual string str () const;
+
+    // Getter
+    string getName() const;
+    int getHP() const;
+    int getMaxHP() const;
 };
 
 /*
