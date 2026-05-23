@@ -3,6 +3,7 @@
 /*
 NOTE:
 -According to the testcase of the school, the morale updating mechanic will not applied if the straw hat destroy buildings.
+-According to the testcase of the school, any condition using name means the name of the class, not the attribute "name"
 */
 
 /*
@@ -175,6 +176,23 @@ bool Character::isStrawHat() const {
 }
 
 bool Character::isCP9() const {
+    return false;
+}
+
+// Add boolean method for specific name check
+bool Character::isLuffy() const {
+    return false;
+}
+
+bool Character::isNami() const {
+    return false;
+}
+
+bool Character::isLucci() const {
+    return false;
+}
+
+bool Character::isJabra() const {
     return false;
 }
 
