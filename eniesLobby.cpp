@@ -41,6 +41,7 @@ Character::Character() {
     speed = 0;
     energy = 0;
     alive = false;
+    isLowestHP = false;
 }
 
 // Constructor for class Character with parameters
