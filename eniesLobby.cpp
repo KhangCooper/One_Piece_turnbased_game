@@ -139,6 +139,10 @@ int Character::getSpeed() const {
     return speed;
 }
 
+int Character::getIsLowestHP() const {
+    return isLowestHP;
+}
+
 /*
 SETTER 
 */
@@ -169,6 +173,11 @@ void Character::setHP(int hp) {
 // Adding setter for speed
 void Character::setSpeed(int speed) {
     this->speed = (speed < 0)? 0 : speed;
+}
+
+// Adding setter for isLowestHP
+void Character::setIsLowestHP(bool isLowestHP) {
+    this->isLowestHP = isLowestHP;
 }
 
 /*
