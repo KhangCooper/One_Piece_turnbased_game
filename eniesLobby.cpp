@@ -1,6 +1,11 @@
 #include "eniesLobby.h"
 
 /*
+NOTE:
+-According to the testcase of the school, the morale updating mechanic will not applied if the straw hat destroy buildings
+*/
+
+/*
  * BattleContext
  */
 BattleContext::BattleContext() {
@@ -125,6 +130,7 @@ StrawHat::StrawHat() : Character() {
 StrawHat::StrawHat(string name, int hp, int atk, int def, // Make class StrawHat inherit the Character's attributes and methods
                    int speed, int energy, long long bounty) : Character(name, hp, atk, def, speed, energy) {
     // Assign value for StrawHat's new attribute
+    this->defeatedEnemyThisTurn = false; // Set false by default
     this->bounty = bounty;
 }
 
@@ -150,32 +156,121 @@ string StrawHat::str() const {
  * Luffy
  */
 Luffy::Luffy(string name, int hp, int atk, int def,
-             int speed, int energy, long long bounty) { 
-    // TODO: implement
+             int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) { // Luffy inherited attributes and methods of StrawHat
 }
 
 int Luffy::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg;
+    int hpBefore = target->getHP(); // Hp before of the target
+
+    if (this->hp > this->maxHp * 0.5) {
+        dmg = this->atk; // If hp is above 50%, damage = atk
+    }
+
+    else if (this->hp > this->maxHp * 0.3 && this->hp <= this->maxHp * 0.5) {
+        dmg = ceil(this->atk * 1.15); // If hp is above 30% and not more than 50%, deal extra 15% damage
+    }
+
+    else if (this->hp <= this->maxHp * 0.3) {
+        dmg = ceil(this->atk * 1.3); // If hp is not more than 30%, deal extra 30% damage
+    }
+
+    int actualDmg = dmg - target->getDef(); // Return the actual dmg
+    if (actualDmg < 0) actualDmg = 0; // Make sure the damage not negative
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0) { // Check if the target hp <= 0 and make sure not to hit the dead character
+        context.morale += 5; // +5 morale after defeat enemy
+    }
+
+    context.alarmLevel = (context.alarmLevel < 0)? 0 : (context.alarmLevel > 100)? 100 : context.alarmLevel; // Make sure the morale in bound
+
+    return actualDmg;
 }
 
 int Luffy::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 20 || this->hp < this->maxHp * 0.15) { // Check skill condition
+        return 0; // If the condition is not satisfied, do nothing
+    }
+    
+    int dmg = this->atk * 2; // damage = 200% atk
+    int hpLost = ceil(0.08 * this->maxHp); // Luffy lost 8% of his MAX hp
+    int hpBefore = target->getHP();
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    
+    this->energy -= 20;
+    this->hp -= hpLost;
+    target->receiveDamage(dmg);
+    
+    // Buff stat after using skill
+    this->speed += 15;
+    this->atk += 15;
+    context.alarmLevel += 10;
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        this->defeatedEnemyThisTurn = true; // Flag if has defeated enemy this turn
+    }
+
+    context.alarmLevel = (context.alarmLevel < 0)? 0 : (context.alarmLevel > 100)? 100 : context.alarmLevel;
+    return actualDmg;
 }
 
 int Luffy::attack(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    // Overloading attack for building target
+    int dmg;
+    if (this->hp > this->maxHp * 0.5) {
+        dmg = this->atk;
+    }
+
+    else if (this->hp > this->maxHp * 0.3 && this->hp <= this->maxHp * 0.5) {
+        dmg = ceil(this->atk * 1.15);
+    }
+
+    else if (this->hp <= this->maxHp * 0.3) {
+        dmg = ceil(this->atk * 1.3);
+    }
+
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 int Luffy::specialSkill(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    // Overloading special skill for building target
+    if (this->energy < 20 || this->hp < this->maxHp * 0.15) {
+        return 0;
+    }
+    
+    int dmg = this->atk * 2;
+    int hpLost = ceil(0.08 * this->maxHp);
+    int hpBefore = target->getHP();
+     
+    
+    this->energy -= 20;
+    this->hp -= hpLost;
+    context.alarmLevel += 10;
+    target->receiveDamage(dmg);
+    this->speed += 15;
+    this->atk += 15;
+
+    context.alarmLevel = (context.alarmLevel < 0)? 0 : (context.alarmLevel > 100)? 100 : context.alarmLevel;
+    return dmg;
 }
 
 void Luffy::endTurn(BattleContext& context) {
-    // TODO: implement
+    if (this->hp <= this->maxHp * 0.3) {
+        context.morale += 3; // +3 morale if hp is not more than 30%
+    }
+
+    // Endturn effect if defeat enemy
+    if (this->defeatedEnemyThisTurn) {
+        this->energy += 5; 
+        this->defeatedEnemyThisTurn = false; // Reset flag
+    }
+
+    // Make sure the energy and morale in bound: [0, 100]
+    this->energy = (this->energy < 0)? 0 : (this->energy > 100)? 100 : this->energy; 
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
 }
 
 /*
