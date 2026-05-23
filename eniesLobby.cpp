@@ -921,21 +921,53 @@ string CP9Agent::str() const {
  */
 Lucci::Lucci(string name, int hp, int atk, int def,
              int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
-    // TODO: implement
 }
 
 int Lucci::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk + ceil(this->doriki * 0.05);
+    int hpBefore = target->getHP();
+    
+    if (target->getHP() < target->getMaxHP() * 0.5) {
+        dmg += ceil(dmg * 0.2);
+    }
+    
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+
+    target->receiveDamage(dmg);    
+    return actualDmg;
 }
 
 int Lucci::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 25) {
+        return 0;
+    }
+
+    this->energy -= 25;
+    int dmg = ceil(this->atk * 2.8);
+    int targetDef = target->getDef();
+    int hpBefore = target->getHP();
+    
+    target->setDef(ceil(targetDef * 0.5));
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+
+    target->receiveDamage(dmg);
+    target->setDef(targetDef);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 10;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    
+    return actualDmg;
 }
 
 void Lucci::endTurn(BattleContext& context) {
-    // TODO: implement
+    if (this->hp < this->maxHp * 0.4) {
+        this->atk += ceil(this->atk * 0.05);
+    }
 }
 
 /*
@@ -943,43 +975,110 @@ void Lucci::endTurn(BattleContext& context) {
  */
 Kaku::Kaku(string name, int hp, int atk, int def,
            int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
-    // TODO: implement
 }
 
 int Kaku::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 5;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
 }
 
 int Kaku::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 20) {
+        return 0;
+    }
+
+    this->energy -= 20;
+    int hpBefore = target->getHP();    
+    int totalDmg = 0;
+    int actualDmg = 0;
+    int def = target->getDef();
+
+    // Multi-hit attack mechanic (120%, 100%, 80%) 
+    if (target->isAlive()) {
+        int dmg1 = ceil(this->atk * 1.2);
+        target->receiveDamage(dmg1);
+        actualDmg += (dmg1 - def > 0) ? (dmg1 - def) : 0;
+    }
+    if (target->isAlive()) {
+        int dmg2 = this->atk;
+        target->receiveDamage(dmg2);
+        actualDmg += (dmg2 - def > 0) ? (dmg2 - def) : 0;
+    }
+    if (target->isAlive()) {
+        int dmg3 = ceil(this->atk * 0.8);
+        target->receiveDamage(dmg3);
+        actualDmg += (dmg3 - def > 0) ? (dmg3 - def) : 0;
+    }
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 5;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
+    return actualDmg;
 }
 
 void Kaku::endTurn(BattleContext& context) {
-    // TODO: implement
+    
 }
 
 /*
  * Jabra
  */
 Jabra::Jabra(string name, int hp, int atk, int def,
-             int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
-    // TODO: implement
+             int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) { 
 }
 
 int Jabra::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+
+    return actualDmg;
 }
 
 int Jabra::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 18) {
+        return 0;
+    }
+
+    this->energy -= 18;
+    int dmg = ceil(this->atk * 1.5);
+    int hpBefore = target->getHP();
+
+    if (this->hp < this->maxHp * 0.3) {
+        dmg += ceil(0.25 * dmg);
+    }
+
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 5;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
+    return actualDmg;
 }
 
 void Jabra::endTurn(BattleContext& context) {
-    // TODO: implement
 }
 
 /*
@@ -987,21 +1086,55 @@ void Jabra::endTurn(BattleContext& context) {
  */
 Blueno::Blueno(string name, int hp, int atk, int def,
                int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
-    // TODO: implement 
 }
 
 int Blueno::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    
+    int dmg = this->atk;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 5;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
 }
 
 int Blueno::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
-}
+    
+    if (this->energy < 15) {
+        return 0;
+    }
 
+    this->energy -= 15;
+    int dmg = ceil(this->atk * 1.3);
+    int hpBefore = target->getHP();
+
+    if (this->hp > this->maxHp * 0.5) {
+        dmg += 20;
+    } 
+
+    else {
+        dmg += 40;
+    }
+
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 5;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
+}
 void Blueno::endTurn(BattleContext& context) {
-    // TODO: implement
 }
 
 /*
@@ -1009,21 +1142,45 @@ void Blueno::endTurn(BattleContext& context) {
  */
 Kalifa::Kalifa(string name, int hp, int atk, int def,
                int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
-    // TODO: implement
 }
 
 int Kalifa::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+
+    return actualDmg;
 }
 
-int Kalifa::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+int Kalifa::specialSkill(Character* target, BattleContext& context) { 
+    if (this->energy < 18) {
+        return 0;
+    }
+
+    this->energy -= 18;
+    int dmg = ceil(this->atk * 1.4);
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int targetSpeed = target->getSpeed();
+    
+    target->receiveDamage(dmg);
+    target->setSpeed(targetSpeed - 6);
+    
+    if (target->isNami()) {
+        context.morale -= 12;
+    }
+
+    else {
+        context.morale -= 8;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
 }
 
 void Kalifa::endTurn(BattleContext& context) {
-    // TODO: implement
 }
 
 /*
@@ -1031,21 +1188,50 @@ void Kalifa::endTurn(BattleContext& context) {
  */
 Kumadori::Kumadori(string name, int hp, int atk, int def,
                    int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
-    // TODO: implement
 }
 
 int Kumadori::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 5;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
 }
 
 int Kumadori::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 16) {
+        return 0;
+    }
+
+    this->energy -= 16;
+    int dmg = 30 + ceil(doriki * 0.1);
+    int hpBefore = target->getHP();
+
+    if (this->hp < this->maxHp * 0.4) {
+        dmg += 25;
+    }
+
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 5;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
 }
 
 void Kumadori::endTurn(BattleContext& context) {
-    // TODO: implement
 }
 
 /*
@@ -1053,21 +1239,46 @@ void Kumadori::endTurn(BattleContext& context) {
  */
 Fukurou::Fukurou(string name, int hp, int atk, int def,
                  int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
-    // TODO: implement
 }
 
 int Fukurou::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+
+    return actualDmg;
 }
 
 int Fukurou::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 14) {
+        return 0;
+    }
+
+    this->energy -= 14;
+    int dmg = ceil(this->atk * 1.3);
+    int hpBefore = target->getHP();
+    
+    if (target->getIsLowestHP()) {
+        dmg += 20;
+    }
+    
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    
+
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0 && target->isStrawHat()) {
+        context.morale -= 6;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
 }
 
 void Fukurou::endTurn(BattleContext& context) {
-    // TODO: implement
 }
 
 /*
