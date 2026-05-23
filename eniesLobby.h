@@ -168,6 +168,14 @@ public:
 };
 
 class Franky : public StrawHat {
+// Adding subskill for Franky special skills
+private:
+    int strongRight(Character* target, BattleContext& context);
+    int coupDeVent(Character* target, BattleContext& context);
+
+    int strongRight(Building* target, BattleContext& context);
+    int coupDeVent(Building* target, BattleContext& context);
+
 public:
     Franky(string name, int hp, int atk, int def,
            int speed, int energy, long long bounty);
