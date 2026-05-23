@@ -21,6 +21,8 @@ protected:
     int speed;
     int energy;
     bool alive;
+    // Add attribute to track lowest hp
+    bool isLowestHP;
 
 public:
     Character();
@@ -47,11 +49,13 @@ public:
     int getDef() const;
     int getSpeed() const;
     int getAtk() const;
+    int getIsLowestHP() const;
 
     // Setter
     void setHP(int hp);
     void setDef(int def);
     void setSpeed(int speed);
+    void setIsLowestHP(bool isLowestHP);
 
     // Boolean method
     virtual bool isStrawHat() const;
