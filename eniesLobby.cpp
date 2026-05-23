@@ -764,30 +764,47 @@ void Fukurou::endTurn(BattleContext& context) {
 /*
  * Building
  */
+// Constructor for building
 Building::Building(string name, int hp) {
-    // TODO: implement
+    this->name = name;
+    this->hp = (hp > 0)? hp : 0; // Make sure hp is not negative
+    this->maxHP = hp;
+    this->destroyed = (hp <= 0); // Set destroyed if hp <= 0
 }
 
 Building::~Building() {
     // TODO: implement if needed
 }
 
+// Same logic with the character, but without minus def
 void Building::receiveDamage(int damage) {
-    // TODO: implement
+    this->hp -= damage;
+
+    if (this->hp <= 0) {
+        this->hp = 0;
+        this->destroyed = true;
+    }
 }
 
 bool Building::isDestroyed() const {
-    // TODO: implement
+    // Virtual method, override later
     return destroyed;
 }
 
 void Building::onDestroyed(BattleContext& context) {
+    // Virtual method, override later
     return ;
 }
 
+// Return info of the building
 string Building::str () const {
-    // TODO: implement
-    return "";
+    stringstream ss;
+    ss << "Building[";
+    ss << "name=" << this->name <<", ";
+    ss << "hp=" << this->hp << ", ";
+    ss << "maxHP=" << this->maxHP << ", ";
+    ss << "destroyed=" << boolalpha <<this->destroyed << "]";
+    return ss.str();
 }
 
 /*
