@@ -1434,50 +1434,503 @@ void BusterCallShip::onDestroyed(BattleContext& context) {
  * EniesLobbyBattle
  */
 EniesLobbyBattle::EniesLobbyBattle(const string& filename) {
-    // TODO: implement
+    strawHatCount = 0;
+    cp9Count = 0;
+    buildingCount = 0;
+    strawHats = new Character*[7];
+    cp9Agents = new Character*[7];
+    buildings = new Building*[5];
+    turnOrder = nullptr;
+    loadFromFile(filename);
 }
 
 EniesLobbyBattle::~EniesLobbyBattle() {
-    // TODO: implement
+    
+    for (int i = 0; i < strawHatCount; i++) {
+        delete strawHats[i];
+    }
+    
+    for (int i = 0; i < cp9Count; i++) { 
+        delete cp9Agents[i];
+    }
+
+    for (int i = 0; i < buildingCount; i++) {
+        delete buildings[i];
+    }
+
+    TurnNode* current = turnOrder;
+    while (current != nullptr) {
+        TurnNode* nextNode = current->next; 
+        delete current;                     
+        current = nextNode;                 
+    }
+    turnOrder = nullptr;
+
+    delete[] strawHats;
+    delete[] cp9Agents;
+    delete[] buildings;
 }
 
 void EniesLobbyBattle::loadFromFile(const string& filename) {
-    // TODO: implement
+    
+    ifstream inputFile(filename);
+    string line;
+    while (getline(inputFile, line)) {
+        stringstream ss(line);
+        string object;
+        ss >> object;
+        if (object == "CONTEXT") {
+            int morale, alarmLevel, rescueProgress, escapeProgress, busterCallTimer, maxTurns;
+            ss >> morale >> alarmLevel >> rescueProgress >> escapeProgress >> busterCallTimer >> maxTurns;
+            context.morale = morale;
+            context.alarmLevel = alarmLevel;
+            context.rescueProgress = rescueProgress;
+            context.escapeProgress = escapeProgress;
+            context.busterCallTimer = busterCallTimer;
+            this->maxTurns = maxTurns;
+        }
+
+        else if (object == "STRAW_HAT") {
+            string name;
+            int hp, atk, def, speed, energy;
+            long long bounty;
+            ss >> name >> hp >> atk >> def >> speed >> energy >> bounty;
+            if (name == "Luffy") {
+                Character*  luffy = new Luffy(name, hp, atk, def, speed, energy, bounty);
+                addStrawHat(luffy);
+            }
+
+            else if (name == "Zoro") {
+                Character* zoro = new Zoro(name, hp, atk, def, speed, energy, bounty);
+                addStrawHat(zoro);
+            }
+
+            else if (name == "Sanji") {
+                Character* sanji = new Sanji(name, hp, atk, def, speed, energy, bounty);
+                addStrawHat(sanji);
+            }
+
+            else if (name == "Nami") {
+                Character* nami = new Nami(name, hp, atk, def, speed, energy, bounty);
+                addStrawHat(nami);
+            }
+
+            else if (name == "Chopper") {
+                Character* chopper = new Chopper(name, hp, atk, def, speed, energy, bounty);
+                addStrawHat(chopper);
+            }
+
+            else if (name == "Usopp") {
+                Character* usopp = new Usopp(name, hp, atk, def, speed, energy, bounty);
+                addStrawHat(usopp);
+            }
+
+            else if (name == "Franky") {
+                Character* franky = new Franky(name, hp, atk, def, speed, energy, bounty);
+                addStrawHat(franky);
+            }
+        }
+
+        else if (object == "CP9") {
+            string name;
+            int hp, atk, def, speed, energy, doriki;
+            ss >> name >> hp >> atk >> def >> speed >> energy >> doriki;
+            if (name == "Lucci") {
+                Character* lucci = new Lucci(name, hp, atk, def, speed, energy, doriki);
+                addCP9Agent(lucci);
+            }
+
+            else if (name == "Kaku") {
+                Character* kaku = new Kaku(name, hp, atk, def, speed, energy, doriki);
+                addCP9Agent(kaku);
+            }
+
+            else if (name == "Jabra") {
+                Character* jabra = new Jabra(name, hp, atk, def, speed, energy, doriki);
+                addCP9Agent(jabra);
+            }
+
+            else if (name == "Blueno") {
+                Character* blueno = new Blueno(name, hp, atk, def, speed, energy, doriki);
+                addCP9Agent(blueno);
+            }
+
+            else if (name == "Kalifa") {
+                Character* kalifa = new Kalifa(name, hp, atk, def, speed, energy, doriki);
+                addCP9Agent(kalifa);
+            }
+
+            else if (name == "Kumadori") {
+                Character* kumadori = new Kumadori(name, hp, atk, def, speed, energy, doriki);
+                addCP9Agent(kumadori);
+            }
+
+            else if (name == "Fukurou") {
+                Character* fukurou = new Fukurou(name, hp, atk, def, speed, energy, doriki);
+                addCP9Agent(fukurou);
+            }
+        }
+
+        else if (object == "BUILDING") {
+            string name;
+            int hp;
+            ss >> name >> hp;
+            if (name == "MainGate") {
+                Building* maingate = new MainGate(name, hp);
+                addBuilding(maingate);
+            }
+
+            else if (name == "Courthouse") {
+                Building* courthouse = new Courthouse(name, hp);
+                addBuilding(courthouse);
+            }
+
+            else if (name == "TowerOfJustice") {
+                Building* towerofjustice = new TowerOfJustice(name, hp);
+                addBuilding(towerofjustice);
+            }
+
+            else if (name == "BridgeOfHesitation") {
+                Building* bridgeofhesitation = new BridgeOfHesitation(name, hp);
+                addBuilding(bridgeofhesitation);
+            }
+
+            else if (name == "BusterCallShip") {
+                Building* bustercallship = new BusterCallShip(name, hp);
+                addBuilding(bustercallship);
+            }
+        }
+    }
+
+    buildTurnOrder();
 }
 
 void EniesLobbyBattle::addStrawHat(Character* character) {
-    // TODO: implement
+    if (strawHatCount < 7) {
+        strawHats[strawHatCount] = character;
+        strawHatCount++; 
+    }
 }
 
 void EniesLobbyBattle::addCP9Agent(Character* character) {
-    // TODO: implement
+    if (cp9Count < 7) {
+        cp9Agents[cp9Count] = character;
+        cp9Count++; 
+    }
 }
 
 void EniesLobbyBattle::addBuilding(Building* building) {
-    // TODO: implement
+    if (buildingCount < 5) {
+        buildings[buildingCount] = building;
+        buildingCount++; 
+    }
 }
 
 void EniesLobbyBattle::buildTurnOrder() {
-    // TODO: implement
+    turnOrder = nullptr;
+    TurnNode* tail = nullptr;
+
+    for (int i = 0; i < strawHatCount; i++) {
+        TurnNode* newNode = new TurnNode();
+        newNode->data = strawHats[i];
+
+        if (turnOrder == nullptr) {
+            turnOrder = newNode;
+            tail = newNode;
+        }
+
+        else {
+            tail->next = newNode;
+            tail = newNode;
+        }
+    }
+
+    for (int i = 0; i < cp9Count; i++) {
+        TurnNode* newNode = new TurnNode();
+        newNode->data = cp9Agents[i]; 
+        newNode->next = nullptr;
+
+        if (turnOrder == nullptr) {
+            turnOrder = newNode;
+            tail = newNode;
+        } 
+        
+        else {
+            tail->next = newNode;
+            tail = newNode;
+        }
+    }
 }
 
 void EniesLobbyBattle::runBattle() {
-    // TODO: implement
+    TurnNode* cur = turnOrder;
+    TurnNode* tail = turnOrder;
+    int idxGate = -1;
+    int idxCourt = -1;
+    int idxBuster = -1;
+    int idxBridge = -1;
+
+    while (tail->next != nullptr) {
+        tail = tail->next;
+    }
+
+    for (int i = 0; i < buildingCount; i++) {
+        if (buildings[i]->getName() == "MainGate") idxGate = i;
+        else if (buildings[i]->getName() == "Courthouse") idxCourt = i;
+        else if (buildings[i]->getName() == "BusterCallShip") idxBuster = i;
+        else if (buildings[i]->getName() == "BridgeOfHesitation") idxBridge = i;
+    }
+
+    while (context.battleEnded == false && context.turnCount < maxTurns) {
+        if (cur == nullptr) {
+            break;
+        }
+
+        Character* curChar = cur->data;
+        if (curChar->isAlive()) {
+            this->processTurn(curChar);
+        }
+
+
+        turnOrder = turnOrder->next;
+        tail->next = cur;
+        cur->next = nullptr;
+        tail = tail->next;
+        cur = turnOrder;
+
+        this->processBuildings();
+        context.nextTurn();
+        this->checkEndCondition();
+    }
+
+    if (context.turnCount >= maxTurns && context.battleEnded == false) {
+        context.battleEnded = true;
+        context.resultCode = "TIME_OUT";
+    }
 }
 
 void EniesLobbyBattle::processTurn(Character* character) {
-    // TODO: implement
+    int lowestHP = 999999;
+    int lowestIdx = -1;
+    int firstStrawHatAlive = -1;
+    int firstAlive = -1;
+
+    for (int i = 0; i < cp9Count; i++) {
+        if (cp9Agents[i]->isAlive()) {
+            firstAlive = i;
+            break;
+        }
+    }
+    
+    for (int i = 0; i < strawHatCount; i++) {
+        if (strawHats[i]->isAlive()) {
+            firstStrawHatAlive = i;
+            break;
+        }
+    }
+    for (int i = 0; i < strawHatCount; i++) {
+        if (strawHats[i]->isAlive() && strawHats[i]->getHP() < lowestHP) {
+            lowestHP = strawHats[i]->getHP();
+            lowestIdx = i;
+        }
+    }
+
+    int idxGate = -1;
+    int idxCourt = -1;
+    int idxBuster = -1;
+    int idxBridge = -1;
+
+    for (int i = 0; i < buildingCount; i++) {
+        if (buildings[i]->getName() == "MainGate") idxGate = i;
+        else if (buildings[i]->getName() == "Courthouse") idxCourt = i;
+        else if (buildings[i]->getName() == "BusterCallShip") idxBuster = i;
+        else if (buildings[i]->getName() == "BridgeOfHesitation") idxBridge = i;
+    }
+
+    bool canUseSkill = character->canUseSkill();
+
+    string actBeforeStr = character->str() + " | alive=" + (character->isAlive() ? "true" : "false");
+
+    if (character->isStrawHat()) {
+        if (character->getName() == "Chopper" && canUseSkill) {
+            character->specialSkill(strawHats[lowestIdx], context);
+        }
+
+        else if (idxGate != -1 && !buildings[idxGate]->isDestroyed()) {
+            int hpBefore = buildings[idxGate]->getHP();
+            if (canUseSkill) {
+                character->specialSkill(buildings[idxGate], context);
+            }
+            
+            else {
+                character->attack(buildings[idxGate], context);
+            }
+            
+            if (hpBefore > 0 && buildings[idxGate]->isDestroyed()) {
+                buildings[idxGate]->onDestroyed(context);
+            }
+        }
+
+        else if (context.mainGateDestroyed && context.alarmLevel >= 50 && idxCourt != -1 && !buildings[idxCourt]->isDestroyed()) {
+            int hpBefore = buildings[idxCourt]->getHP();
+
+            if (canUseSkill) {
+                character->specialSkill(buildings[idxCourt], context);
+            }
+
+            else {
+                character->attack(buildings[idxCourt], context);
+            }
+
+            if (hpBefore > 0 && buildings[idxCourt]->isDestroyed()) {
+                context.courtDestroyed = true;
+                buildings[idxCourt]->onDestroyed(context);
+            }
+        }
+
+        else if (context.busterCallTimer <= 5 && idxBuster != -1 && !buildings[idxBuster]->isDestroyed()) {
+            int hpBefore = buildings[idxBuster]->getHP();
+
+            if (canUseSkill) {
+                character->specialSkill(buildings[idxBuster], context);
+            }
+
+            else {
+                character->attack(buildings[idxBuster], context);
+            }
+
+            if (hpBefore > 0 && buildings[idxBuster]->isDestroyed()) {
+                buildings[idxBuster]->onDestroyed(context);
+            }
+        }
+
+        else if (context.robinRescued == false) {
+            if (canUseSkill) {
+                character->specialSkill(cp9Agents[firstAlive], context);
+            }
+            else {
+                character->attack(cp9Agents[firstAlive], context);
+            }
+        }
+
+        else if (context.robinRescued) {
+            if (buildings[idxBridge]->isDestroyed() || idxBridge == -1) {      
+                
+                if (canUseSkill) {
+                    character->specialSkill(cp9Agents[firstAlive], context);
+                }
+                
+                else {
+                    character->attack(cp9Agents[firstAlive], context);
+                }
+            }
+
+            else {
+                int hpBefore = buildings[idxBridge]->getHP();
+                if (canUseSkill) {
+                    character->specialSkill(buildings[idxBridge], context);
+                }
+                
+                else {
+                    character->attack(buildings[idxBridge], context);
+                }
+
+                if (hpBefore > 0 && buildings[idxBridge]->isDestroyed()) {
+                    buildings[idxBridge]->onDestroyed(context);
+                }
+            }
+        }
+    }
+
+    else if (character->isCP9() && firstStrawHatAlive != -1) {
+        if (character->getName() == "Fukurou" && firstStrawHatAlive == lowestIdx) {
+            strawHats[firstStrawHatAlive]->setIsLowestHP(true);
+            if (canUseSkill) {
+                character->specialSkill(strawHats[firstStrawHatAlive], context);
+            }
+
+            else {
+                character->attack(strawHats[firstStrawHatAlive], context);
+            } 
+            strawHats[firstStrawHatAlive]->setIsLowestHP(false);
+        }
+
+        else {
+            if (canUseSkill) {
+                character->specialSkill(strawHats[firstStrawHatAlive], context);
+            }
+            else {
+                character->attack(strawHats[firstStrawHatAlive], context);
+            }
+        }
+    }
+
+    character->endTurn(context);
 }
 
 void EniesLobbyBattle::processBuildings() {
-    // TODO: implement
+    for (int i = 0; i < buildingCount; i++) {
+        if (!buildings[i]->isDestroyed()) {
+            buildings[i]->applyEffect(context);
+        }
+    } 
 }
 
 void EniesLobbyBattle::checkEndCondition() {
-    // TODO: implement
+    if (context.battleEnded) {
+        return;
+    }
+
+    bool allStrawDead = true;
+    for (int i = 0; i < strawHatCount; i++) {
+        if (strawHats[i]->isAlive()) {
+            allStrawDead = false;
+            break;
+        }
+    }
+
+    bool allCp9Dead = true;
+    for (int i = 0; i < cp9Count; i++) {
+        if (cp9Agents[i]->isAlive()) {
+            allCp9Dead = false;
+            break;
+        }
+    }
+
+    if (context.robinRescued == true && context.escapeProgress >= 100) {
+        context.battleEnded = true;
+        context.resultCode = "STRAW_HAT_WIN";
+    }
+
+    else if (context.busterCallTimer <= 0) {
+        context.battleEnded = true;
+        context.resultCode = "BUSTER_CALL";
+    }
+
+    else if (allStrawDead) {
+        context.battleEnded = true;
+        context.resultCode = "CP9_WIN";
+    }
+
+    else if (allCp9Dead) {
+        context.battleEnded = true;
+        context.resultCode = "STRAW_HAT_WIN_BY_DEFEAT_CP9";
+    }
+
+    else if (context.turnCount >= maxTurns) {
+        context.battleEnded = true;
+        context.resultCode = "TIME_OUT";
+    }
 }
 
 string EniesLobbyBattle::getResult() const {
-    // TODO: implement
-    return "";
+    stringstream ss;
+    ss << context.resultCode << " ";
+    ss << context.turnCount << " ";
+    ss << context.morale << " ";
+    ss << context.alarmLevel << " ";
+    ss << context.rescueProgress << " ";
+    ss << context.escapeProgress << " ";
+    ss << context.busterCallTimer;
+    return ss.str();
 }
