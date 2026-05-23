@@ -1346,11 +1346,17 @@ string Building::str () const {
 MainGate::MainGate(string name, int hp) : Building(name, hp) {}
 
 void MainGate::applyEffect(BattleContext& context) {
-    // TODO: implement
+    if (context.mainGateDestroyed) return;
 }
 
 void MainGate::onDestroyed(BattleContext& context) {
-    // TODO: implement
+    context.mainGateDestroyed = true;
+    context.increaseRescue = true; 
+    context.rescueProgress += 20;
+    context.morale += 5;
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    context.rescueProgress = (context.rescueProgress < 0)? 0 : (context.rescueProgress > 100)? 100 : context.rescueProgress;
 }
 
 /*
@@ -1359,11 +1365,14 @@ void MainGate::onDestroyed(BattleContext& context) {
 Courthouse::Courthouse(string name, int hp) : Building(name, hp) {}
 
 void Courthouse::applyEffect(BattleContext& context) {
-    // TODO: implement
+    if (this->destroyed) return;
+    context.alarmLevel += 5;
+    context.alarmLevel = (context.alarmLevel < 0)? 0 : (context.alarmLevel > 100)? 100 : context.alarmLevel;
 }
 
 void Courthouse::onDestroyed(BattleContext& context) {
-    // TODO: implement
+    context.alarmLevel -= 20;
+    context.alarmLevel = (context.alarmLevel < 0)? 0 : (context.alarmLevel > 100)? 100 : context.alarmLevel;
 }
 
 /*
@@ -1372,7 +1381,18 @@ void Courthouse::onDestroyed(BattleContext& context) {
 TowerOfJustice::TowerOfJustice(string name, int hp) : Building(name, hp) {}
 
 void TowerOfJustice::applyEffect(BattleContext& context) {
-    // TODO: implement
+    if (context.mainGateDestroyed == true && !context.robinRescued && context.increaseRescue) {
+        context.rescueProgress += 5;
+    }
+
+    context.rescueProgress = (context.rescueProgress < 0)? 0 : (context.rescueProgress > 100)? 100 : context.rescueProgress;
+    
+    if (context.rescueProgress >= 100 && !context.robinRescued) {
+        context.robinRescued = true;
+        context.morale += 10;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
 }
 
 /*
@@ -1381,7 +1401,16 @@ void TowerOfJustice::applyEffect(BattleContext& context) {
 BridgeOfHesitation::BridgeOfHesitation(string name, int hp) : Building(name, hp) {}
 
 void BridgeOfHesitation::applyEffect(BattleContext& context) {
-    // TODO: implement
+    if (context.robinRescued == true) {
+        context.bridgeOpened = true;
+        context.escapeProgress += 5;
+    }
+    context.escapeProgress = (context.escapeProgress < 0)? 0 : (context.escapeProgress > 100)? 100 : context.escapeProgress;
+
+    if (context.escapeProgress >= 100) {
+        context.resultCode = "STRAW_HAT_WIN";
+        return;
+    }
 }
 
 /*
@@ -1390,11 +1419,15 @@ void BridgeOfHesitation::applyEffect(BattleContext& context) {
 BusterCallShip::BusterCallShip(string name, int hp) : Building(name, hp) {}
 
 void BusterCallShip::applyEffect(BattleContext& context) {
-    // TODO: implement
+    context.busterCallTimer--;
+    context.busterCallTimer = (context.busterCallTimer < 0)? 0 : context.busterCallTimer;
+    if (context.busterCallTimer == 0) {
+        context.resultCode = "BUSTER_CALL";
+    }
 }
 
 void BusterCallShip::onDestroyed(BattleContext& context) {
-    // TODO: implement
+    context.busterCallTimer += 3;
 }
 
 /*
