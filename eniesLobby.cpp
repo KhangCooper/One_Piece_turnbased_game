@@ -613,22 +613,59 @@ Chopper::Chopper(string name, int hp, int atk, int def,
 }
 
 int Chopper::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        this->defeatedEnemyThisTurn = true;
+        context.morale += 5;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
+    return actualDmg;
 }
 
 int Chopper::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
+    if (this->energy < 15) {
+        return 0;
+    }
+
+    // If not StrawHat -> not heal
+    if (!target->isStrawHat()) {
+        return 0;
+    }
+
+    this->energy -= 15;
+    int heal = 35 + ceil(this->atk * 0.5);
+    int curHp = target->getHP();
+    target->setHP(curHp + heal);
+
+    // Plus morale if target is luffy
+    if (target->isLuffy()) {
+        context.morale += 5;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+
     return 0;
 }
 
 int Chopper::attack(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int hpBefore = target->getHP();
+    target->receiveDamage(dmg);
+
+    return dmg;
 }
 
 void Chopper::endTurn(BattleContext& context) {
-    // TODO: implement
+    if (this->defeatedEnemyThisTurn) {
+        this->defeatedEnemyThisTurn = false;
+    }
+    return;
 }
 
 /*
@@ -636,31 +673,76 @@ void Chopper::endTurn(BattleContext& context) {
  */
 Usopp::Usopp(string name, int hp, int atk, int def,
              int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
-    // TODO: implement
 }
 
 int Usopp::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int hpBefore = target->getHP();
+    if (target->getSpeed() < 50) {
+        dmg += ceil(0.2 * dmg);
+    }
+    
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    target->receiveDamage(dmg);
+    
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        defeatedEnemyThisTurn = true;
+    }
+
+    return actualDmg;
 }
 
 int Usopp::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 16) {
+        return 0;
+    }
+
+    this->energy -= 16;
+    int dmg = ceil(this->atk * 0.8);
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int hpBefore = target->getHP();
+    int targetSpeed = target->getSpeed();
+    
+    target->receiveDamage(dmg);
+    target->setSpeed(targetSpeed - 12);
+    context.escapeProgress += 8;
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        defeatedEnemyThisTurn = true;
+    }
+
+    return actualDmg;
 }
 
 int Usopp::attack(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = ceil(this->atk * 0.5);
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 int Usopp::specialSkill(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 16) {
+        return 0;
+    }
+
+    this->energy -= 16;
+    int dmg = ceil(this->atk * 0.8);
+    target->receiveDamage(dmg);
+    context.escapeProgress += 8;
+    context.escapeProgress = (context.escapeProgress < 0)? 0 : (context.escapeProgress > 100)? 100 : context.escapeProgress;
+
+    return dmg;
 }
 
 void Usopp::endTurn(BattleContext& context) {
-    // TODO: implement
+    context.morale += 10;
+    if (this->defeatedEnemyThisTurn) {
+        this->defeatedEnemyThisTurn = false;
+    }
+    
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
 }
 
 /*
