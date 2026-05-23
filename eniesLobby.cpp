@@ -17,6 +17,8 @@ BattleContext::BattleContext() {
     escapeProgress = 0;
     busterCallTimer = 0;
     mainGateDestroyed = false;
+    courtDestroyed = false;
+    increaseRescue = false;
     robinRescued = false;
     bridgeOpened = false;
     battleEnded = false;
@@ -24,7 +26,7 @@ BattleContext::BattleContext() {
 }
 
 void BattleContext::nextTurn() {
-    // TODO: implement
+    this->turnCount++;
 }
 
 /*
@@ -196,6 +198,10 @@ bool Character::isJabra() const {
     return false;
 }
 
+bool Character::canUseSkill() const {
+    return false;
+}
+
 /*
  * StrawHat
  */
@@ -333,6 +339,10 @@ int Luffy::specialSkill(Building* target, BattleContext& context) {
     return dmg;
 }
 
+bool Luffy::canUseSkill() const {
+    return (this->energy >= 20 && this->hp >= this->maxHp * 0.15);
+}
+
 void Luffy::endTurn(BattleContext& context) {
     if (this->hp <= this->maxHp * 0.3) {
         context.morale += 3; // +3 morale if hp is not more than 30%
@@ -439,6 +449,10 @@ int Zoro::specialSkill(Building* target, BattleContext& context) {
     return dmg;
 }
 
+bool Zoro::canUseSkill() const {
+    return (this->energy >= 15);
+}
+
 void Zoro::endTurn(BattleContext& context) {
     if (this->defeatedEnemyThisTurn) {
         context.morale += 6;
@@ -519,6 +533,10 @@ int Sanji::specialSkill(Building* target, BattleContext& context) {
     int dmg = ceil(2.1 * this->atk);
     target->receiveDamage(dmg);
     return dmg;
+}
+
+bool Sanji::canUseSkill() const {
+    return (this->energy >= 18);
 }
 
 void Sanji::endTurn(BattleContext& context) {
@@ -613,6 +631,10 @@ int Nami::specialSkill(Building* target, BattleContext& context) {
     return dmg;
 }
 
+bool Nami::canUseSkill() const {
+    return (this->energy >= 20);
+}
+
 void Nami::endTurn(BattleContext& context) {
     if (this->defeatedEnemyThisTurn) {
         energy += 6;
@@ -677,6 +699,10 @@ int Chopper::attack(Building* target, BattleContext& context) {
     target->receiveDamage(dmg);
 
     return dmg;
+}
+
+bool Chopper::canUseSkill() const {
+    return (this->energy >= 15);
 }
 
 void Chopper::endTurn(BattleContext& context) {
@@ -752,6 +778,10 @@ int Usopp::specialSkill(Building* target, BattleContext& context) {
     context.escapeProgress = (context.escapeProgress < 0)? 0 : (context.escapeProgress > 100)? 100 : context.escapeProgress;
 
     return dmg;
+}
+
+bool Usopp::canUseSkill() const {
+    return (this->energy >= 16);
 }
 
 void Usopp::endTurn(BattleContext& context) {
@@ -874,6 +904,10 @@ int Franky::specialSkill(Building* target, BattleContext& context) {
     return 0;
 }
 
+bool Franky::canUseSkill() const {
+    return (this->energy >= 20);
+}
+
 void Franky::endTurn(BattleContext& context) {
     if (this->hp > this->maxHp * 0.7) {
         this->def += 5;
@@ -964,6 +998,10 @@ int Lucci::specialSkill(Character* target, BattleContext& context) {
     return actualDmg;
 }
 
+bool Lucci::canUseSkill() const {
+    return (this->energy >= 25);
+}
+
 void Lucci::endTurn(BattleContext& context) {
     if (this->hp < this->maxHp * 0.4) {
         this->atk += ceil(this->atk * 0.05);
@@ -1030,6 +1068,10 @@ int Kaku::specialSkill(Character* target, BattleContext& context) {
     return actualDmg;
 }
 
+bool Kaku::canUseSkill() const {
+    return (this->energy >= 20);
+}
+
 void Kaku::endTurn(BattleContext& context) {
     
 }
@@ -1076,6 +1118,10 @@ int Jabra::specialSkill(Character* target, BattleContext& context) {
     context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
 
     return actualDmg;
+}
+
+bool Jabra::canUseSkill() const {
+    return (this->energy >= 18);
 }
 
 void Jabra::endTurn(BattleContext& context) {
@@ -1134,6 +1180,11 @@ int Blueno::specialSkill(Character* target, BattleContext& context) {
     context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
     return actualDmg;
 }
+
+bool Blueno::canUseSkill() const {
+    return (this->energy >= 15);
+}
+
 void Blueno::endTurn(BattleContext& context) {
 }
 
@@ -1178,6 +1229,10 @@ int Kalifa::specialSkill(Character* target, BattleContext& context) {
 
     context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
     return actualDmg;
+}
+
+bool Kalifa::canUseSkill() const {
+    return (this->energy >= 18);
 }
 
 void Kalifa::endTurn(BattleContext& context) {
@@ -1231,6 +1286,10 @@ int Kumadori::specialSkill(Character* target, BattleContext& context) {
     return actualDmg;
 }
 
+bool Kumadori::canUseSkill() const {
+    return (this->energy >= 16);
+}
+
 void Kumadori::endTurn(BattleContext& context) {
 }
 
@@ -1276,6 +1335,10 @@ int Fukurou::specialSkill(Character* target, BattleContext& context) {
     
     context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
     return actualDmg;
+}
+
+bool Fukurou::canUseSkill() const {
+    return (this->energy >= 14);
 }
 
 void Fukurou::endTurn(BattleContext& context) {
