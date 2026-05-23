@@ -796,6 +796,19 @@ void Building::onDestroyed(BattleContext& context) {
     return ;
 }
 
+// Adding getter for buildings
+string Building::getName() const {
+    return name;
+}
+
+int Building::getHP() const {
+    return hp;
+}
+
+int Building::getMaxHP() const {
+    return maxHP;
+}
+
 // Return info of the building
 string Building::str () const {
     stringstream ss;
@@ -803,7 +816,7 @@ string Building::str () const {
     ss << "name=" << this->name <<", ";
     ss << "hp=" << this->hp << ", ";
     ss << "maxHP=" << this->maxHP << ", ";
-    ss << "destroyed=" << boolalpha <<this->destroyed << "]";
+    ss << "destroyed=" << boolalpha << this->destroyed << "]";
     return ss.str();
 }
 
