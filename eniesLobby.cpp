@@ -435,8 +435,7 @@ void Zoro::endTurn(BattleContext& context) {
  * Sanji
  */
 Sanji::Sanji(string name, int hp, int atk, int def,
-             int speed, int energy, long long bounty) {
-    // TODO: implement
+             int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
 }
 
 int Sanji::attack(Character* target, BattleContext& context) {
@@ -467,7 +466,7 @@ void Sanji::endTurn(BattleContext& context) {
  * Nami
  */
 Nami::Nami(string name, int hp, int atk, int def,
-           int speed, int energy, long long bounty) {
+           int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
 }
 
@@ -499,7 +498,7 @@ void Nami::endTurn(BattleContext& context) {
  * Chopper
  */
 Chopper::Chopper(string name, int hp, int atk, int def,
-                 int speed, int energy, long long bounty) {
+                 int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
 }
 
@@ -526,7 +525,7 @@ void Chopper::endTurn(BattleContext& context) {
  * Usopp
  */
 Usopp::Usopp(string name, int hp, int atk, int def,
-             int speed, int energy, long long bounty) {
+             int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
 }
 
@@ -558,7 +557,7 @@ void Usopp::endTurn(BattleContext& context) {
  * Franky
  */
 Franky::Franky(string name, int hp, int atk, int def,
-               int speed, int energy, long long bounty) {
+               int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
     // TODO: implement
 }
 
@@ -594,24 +593,32 @@ CP9Agent::CP9Agent() : Character() {
 }
 
 CP9Agent::CP9Agent(string name, int hp, int atk, int def,
-                   int speed, int energy, int doriki) {
-    // TODO: implement
+                   int speed, int energy, int doriki) : Character(name, hp, atk, def, speed, energy) {
 }
 
 bool CP9Agent::isCP9() const {
-    // TODO: implement
+    return true;
 }
 
 string CP9Agent::str() const {
-    // TODO: implement
-    return "";
+    stringstream ss;
+    ss << "CP9[";
+    ss << "name=" << this->name <<", ";
+    ss << "hp=" << this->hp << ", ";
+    ss << "atk=" << this->atk << ", ";
+    ss << "def=" << this->def << ", ";
+    ss << "speed=" << this->speed << ", ";
+    ss << "energy=" << this->energy << ", ";
+    ss << "doriki=" << this->doriki << "]";
+
+    return ss.str();
 }
 
 /*
  * Lucci
  */
 Lucci::Lucci(string name, int hp, int atk, int def,
-             int speed, int energy, int doriki) {
+             int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
 }
 
@@ -633,7 +640,7 @@ void Lucci::endTurn(BattleContext& context) {
  * Kaku
  */
 Kaku::Kaku(string name, int hp, int atk, int def,
-           int speed, int energy, int doriki) {
+           int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
 }
 
@@ -655,7 +662,7 @@ void Kaku::endTurn(BattleContext& context) {
  * Jabra
  */
 Jabra::Jabra(string name, int hp, int atk, int def,
-             int speed, int energy, int doriki) {
+             int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
 }
 
@@ -677,7 +684,7 @@ void Jabra::endTurn(BattleContext& context) {
  * Blueno
  */
 Blueno::Blueno(string name, int hp, int atk, int def,
-               int speed, int energy, int doriki) {
+               int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement 
 }
 
@@ -699,7 +706,7 @@ void Blueno::endTurn(BattleContext& context) {
  * Kalifa
  */
 Kalifa::Kalifa(string name, int hp, int atk, int def,
-               int speed, int energy, int doriki) {
+               int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
 }
 
@@ -721,7 +728,7 @@ void Kalifa::endTurn(BattleContext& context) {
  * Kumadori
  */
 Kumadori::Kumadori(string name, int hp, int atk, int def,
-                   int speed, int energy, int doriki) {
+                   int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
 }
 
@@ -743,7 +750,7 @@ void Kumadori::endTurn(BattleContext& context) {
  * Fukurou
  */
 Fukurou::Fukurou(string name, int hp, int atk, int def,
-                 int speed, int energy, int doriki) {
+                 int speed, int energy, int doriki) : CP9Agent(name, hp, atk, def, speed, energy, doriki) {
     // TODO: implement
 }
 
