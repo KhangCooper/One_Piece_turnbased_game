@@ -40,6 +40,18 @@ public:
     string getName() const;
     int getHP() const;
     int getEnergy() const;
+    // Extra method
+
+    // Getter
+    int getMaxHP() const;
+    int getDef() const;
+    int getSpeed() const;
+    int getAtk() const;
+
+    // Setter
+    void setHP(int hp);
+    void setDef(int def);
+    void setSpeed(int speed);
 
     virtual bool isStrawHat() const;
     virtual bool isCP9() const;
