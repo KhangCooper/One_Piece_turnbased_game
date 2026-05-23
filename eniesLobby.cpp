@@ -439,27 +439,78 @@ Sanji::Sanji(string name, int hp, int atk, int def,
 }
 
 int Sanji::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk + ceil(this->speed * 0.5);
+    int hpBefore = target->getHP(); 
+    int targetDef = target->getDef();
+
+    // Bypass defense mechanics
+    if (targetDef < this->def) {
+        dmg += ceil(dmg * 0.1);
+    }
+
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    target->receiveDamage(dmg);
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        this->defeatedEnemyThisTurn = true;
+    }
+
+    return actualDmg;
 }
 
 int Sanji::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 18) {
+        return 0;
+    }
+
+    this->energy -= 18;
+    int dmg = ceil(2.1 * this->atk);
+    int hpBefore = target->getHP();
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    target->receiveDamage(dmg);
+    
+    int targetDef = target->getDef();
+    if (target->isJabra()) {
+        target->setDef(targetDef - 12);
+    }
+    else {
+        target->setDef(targetDef - 8);
+    }
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        this->defeatedEnemyThisTurn = true;
+    }
+
+    return actualDmg;
 }
 
 int Sanji::attack(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk + ceil(this->speed * 0.5);
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 int Sanji::specialSkill(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 18) {
+        return 0;
+    }
+    
+    this->energy -= 18;
+    int dmg = ceil(2.1 * this->atk);
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 void Sanji::endTurn(BattleContext& context) {
-    // TODO: implement
+    if (this->defeatedEnemyThisTurn) {
+        context.morale += 8;
+        this->atk += ceil(this->atk * 0.1);
+        defeatedEnemyThisTurn = false;
+
+        context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    }
 }
 
 /*
@@ -467,31 +518,90 @@ void Sanji::endTurn(BattleContext& context) {
  */
 Nami::Nami(string name, int hp, int atk, int def,
            int speed, int energy, long long bounty) : StrawHat(name, hp, atk, def, speed, energy, bounty) {
-    // TODO: implement
 }
 
 int Nami::attack(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = this->atk;
+    int targetDef = target->getDef();
+    int hpBefore = target->getHP();
+    target->setDef(ceil(targetDef * 0.7));
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    target->receiveDamage(dmg);
+    target->setDef(targetDef);
+
+    if (hpBefore > 0 && target->getHP() <= 0) {
+        this->defeatedEnemyThisTurn = true;
+        context.morale += 5;
+    }
+
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    return actualDmg;
 }
 
 int Nami::specialSkill(Character* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 20) {
+        return 0;
+    }
+
+    int dmg = this->atk + 40;
+    int actualDmg = dmg - target->getDef();
+    if (actualDmg < 0) actualDmg = 0;
+    int targetSpeed = target->getSpeed();
+    int targetHP = target->getHP();
+
+    this->energy -= 20;
+    target->receiveDamage(dmg);
+    target->setSpeed(targetSpeed - 10); // reduce target speed
+    context.alarmLevel -= 5;
+    context.busterCallTimer++;
+    
+    if (targetHP > 0 && target->getHP() <= 0) {
+        this->defeatedEnemyThisTurn = true;
+        context.morale += 5;
+    }
+
+    // Make sure morale, alarmLevel and busterCallTimer in bound: [0, 100]
+    context.morale = (context.morale < 0)? 0 : (context.morale > 100)? 100 : context.morale;
+    context.alarmLevel = (context.alarmLevel < 0)? 0 : (context.alarmLevel > 100)? 100 : context.alarmLevel;
+    context.busterCallTimer = (context.busterCallTimer < 0)? 0 : context.busterCallTimer;
+
+    return actualDmg;
 }
 
 int Nami::attack(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    int dmg = ceil(this->atk * 0.5);
+    target->receiveDamage(dmg);
+    return dmg;
 }
 
 int Nami::specialSkill(Building* target, BattleContext& context) {
-    // TODO: implement
-    return 0;
+    if (this->energy < 20) {
+        return 0;
+    }
+    
+    this->energy -= 20;
+    int dmg = ceil((this->atk + 40) * 1.5);
+    target->receiveDamage(dmg);
+    context.alarmLevel -= 5;
+    context.busterCallTimer++;
+
+    context.alarmLevel = (context.alarmLevel < 0)? 0 : (context.alarmLevel > 100)? 100 : context.alarmLevel;
+
+    if (context.busterCallTimer < 0) {
+        context.busterCallTimer = 0;
+    } 
+
+    return dmg;
 }
 
 void Nami::endTurn(BattleContext& context) {
-    // TODO: implement
+    if (this->defeatedEnemyThisTurn) {
+        energy += 6;
+        this->defeatedEnemyThisTurn = false;
+    }
+    
+    this->energy = (this->energy < 0)? 0 : (this->energy > 100)? 100 : this->energy;
 }
 
 /*
