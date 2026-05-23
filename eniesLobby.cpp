@@ -125,6 +125,16 @@ int Character::getMaxHP() const {
     return maxHp;
 }
 
+// Adding getter for atk
+int Character::getAtk() const {
+    return atk;
+}
+
+// Adding getter for speed
+int Character::getSpeed() const {
+    return speed;
+}
+
 /*
 SETTER 
 */
@@ -134,6 +144,27 @@ void Character::setDef(int def) {
     if (this->def < 0) {
         this->def = 0;
     }
+}
+
+// Adding setter for hp
+void Character::setHP(int hp) {
+    if (!this->isAlive()) {
+        return;
+    }
+    this->hp = hp;
+    if (this->hp > this->maxHp) {
+        this->hp = this->maxHp;
+    }
+
+    if (this->hp <= 0) {
+        this->hp = 0;
+        this->alive = false;
+    }
+}
+
+// Adding setter for speed
+void Character::setSpeed(int speed) {
+    this->speed = (speed < 0)? 0 : speed;
 }
 
 /*
