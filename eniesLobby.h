@@ -53,8 +53,14 @@ public:
     void setDef(int def);
     void setSpeed(int speed);
 
+    // Boolean method
     virtual bool isStrawHat() const;
     virtual bool isCP9() const;
+    // Add boolean method for specific name check
+    virtual bool isNami() const;
+    virtual bool isLuffy() const;
+    virtual bool isLucci() const;
+    virtual bool isJabra() const;
 
     virtual string str() const = 0;
 };
